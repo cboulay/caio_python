@@ -4,6 +4,7 @@ class Caio(object):
 		#TODO: Create a few variables to be exposed, e.g. fs, data, devname, memType
 		#TODO: Control these variables through getters and setters.
 		#TODO: Hide other instance variables. e.g., _aio, _Id
+		#TODO: load the library in linux? (Linux drivers exist)
 		self.aio=windll.LoadLibrary("caio.dll")
 		self.devname=devname
 		self.Id=c_short()
