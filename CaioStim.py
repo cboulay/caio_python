@@ -16,7 +16,7 @@ class TriggerBox(object):
 		Properties:
 			stim_ready - True if the stimulator reports ready, False otherwise.
 		"""
-		self.caio = Caio_ctype.Caio(devname='AIO000', amplitude=0.01)
+		self.caio = Caio_ctype.Caio(devname='AIO000', amplitude=1)
 		
 	def trigger(self):
 		self.caio.stimulate()
