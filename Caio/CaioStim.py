@@ -15,9 +15,10 @@ class TriggerBox(object):
 		Properties:
 			stim_ready - True if the stimulator reports ready, False otherwise.
 		"""
-		caio = Caio_ctype.Caio(devname=devname)
+		self.stim_intensity = None
 		
-		#Initialize with some defaults
+		#Initialize then set some defaults
+		caio = Caio_ctype.Caio(devname=devname)
 		caio.n_channels=2
 		caio.memory_type='RING'#FIFO is default
 		caio.clock_type='Internal'
@@ -41,3 +42,4 @@ class TriggerBox(object):
 		data=np.zeros((n_samples+1, self.caio.n_channels))
 		data[:-1,channel-1]=amplitude
 		self.caio.buffer=data
+		self.stim_intensity=amplitude
