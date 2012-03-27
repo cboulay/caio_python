@@ -1,5 +1,5 @@
 from distutils.core import setup
 setup(name='Caio',
-      version='1.0.03',
+      version='1.0.05',
       packages = ['Caio']
 )
