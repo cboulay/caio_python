@@ -45,13 +45,26 @@ class TTL(object):
 		caio.reset_memory()
 		self._caio=caio
 		
+		self.amplitude=0
+		self.trigger() #Necessary to make sure the output is at 0
 		#Create default output data, i.e. 5V 50ms TTL on channel 1
-		self.set_TTL() #This should set _data, which sets _caio.buffer
+		self.amplitude=5
+		
 		
 	def _get_amplitude(self): return self._amplitude
 	def _set_amplitude(self, value): self.set_TTL(amplitude=value)
 	amplitude = property(_get_amplitude, _set_amplitude)
 	
+	def set_TTL(self, amplitude=None, width=None, channel=None):
+		#amplitude in V, width in ms, channel in base 1 (first = 1)
+		if amplitude: self._amplitude = amplitude
+		if width: self._width = width
+		if channel: self._channel = channel
+		n_samples = np.ceil((float(self._width)/1000) * self._caio.fs)
+		data=np.zeros((n_samples+1, self._caio.n_channels))
+		data[:-1,self._channel-1]=self._amplitude
+		self.data=data
+		
 	def _get_data(self):
 		return self._data
 	def _set_data(self, value):
@@ -62,13 +75,3 @@ class TTL(object):
 	
 	def trigger(self):
 		self._caio.start()
-		
-	def set_TTL(self, amplitude=None, width=None, channel=None):
-		#amplitude in V, width in ms, channel in base 1 (first = 1)
-		if amplitude: self._amplitude = amplitude
-		if width: self._width = width
-		if channel: self._channel = channel
-		n_samples = np.ceil((float(self._width)/1000) * self._caio.fs)
-		data=np.zeros((n_samples+1, self._caio.n_channels))
-		data[:-1,self._channel-1]=self._amplitude
-		self.data=data
