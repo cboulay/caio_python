@@ -222,6 +222,7 @@ class Caio(object):
 	def _handle_ret(self, func_name, RET):
 		if RET != 0:
 			ErrorString = create_string_buffer(256)
-			Ret2 = self._aio.AioGetErrorString(Ret, byref(ErrorString))
-			print func_name + " = %d : %s\n\n" % RET, ErrorString.value
+			Ret2 = self._aio.AioGetErrorString(RET, byref(ErrorString))
+			print '%(fname)s = %(err_num)s : %(err_str)s' %\
+				{"fname": func_name, "err_num": RET, "err_str": ErrorString.value}
 			RET = self._aio.AioExit(self._Id)
