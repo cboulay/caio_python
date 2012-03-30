@@ -9,9 +9,17 @@ Only works in windows but shouldn't be too difficult to modify to load the linux
 The Contec driver must be installed.
 
 ```python
-from Caio import CaioStim
-mytrigbox=CaioStim.TriggerBox()
-mytrigbox.trigger()
+from Caio.TriggerBox import TTL
+trigbox=TTL()
+trigbox._caio.fs=10000
+trigbox.set_TTL(width=1, channel=2)
+trigbox.trigger()
+
+#This is to create an artificial stimulator device with an interface similar to the Magstim interface
+from Caio.VirtualStimulatorInterface import Virtual
+stimulator=Virtual(trigbox=trigbox)
+stimulator.trigger() #this is just a proxy for self.trigbox.trigger()
+
 ```
 
 ## Other information
