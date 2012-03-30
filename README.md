@@ -14,12 +14,18 @@ trigbox=TTL()
 trigbox._caio.fs=10000
 trigbox.set_TTL(width=1, channel=2)
 trigbox.trigger()
+```
 
-#This is to create an artificial stimulator device with an interface similar to the Magstim interface
+My [magstim module](https://github.com/cboulay/magstim-python) is triggered via this triggerbox.
+I also use a Digitimer DS5 but it is considerably simpler than the Magstim device so I have
+created a VirtualStimulatorInterface (included in this package) that can be used in place of the Magstim interface.
+This VirtualStimulatorInterface, like the Magstim interface, has a method trigger() which is
+simply a proxy to self.trigbox.trigger()
+
+```python
 from Caio.VirtualStimulatorInterface import Virtual
 stimulator=Virtual(trigbox=trigbox)
-stimulator.trigger() #this is just a proxy for self.trigbox.trigger()
-
+stimulator.trigger()
 ```
 
 ## Other information
