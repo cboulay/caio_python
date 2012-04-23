@@ -1,5 +1,5 @@
 class Virtual(object):
-    def __init__(self, trigbox=None):
+    def __init__(self, trigbox=None, gui=False, frame=None):
         """
         This is a simple interface to a virtual stimulator.
         It is meant to mimic the MagstimInterface thus the same properties
@@ -31,11 +31,12 @@ class Virtual(object):
         #There must be a minimum stimulus, which I set to 0.5mA or about 50mV on the output.
         mamps = max([mamps,0.5])
         self.trigbox.amplitude=mamps / self.V2mA
-    stim_intensity = property(_get_stimi, _set_stimi)
+        #TODO: Update the GUI with the stimulus intensity.
+    intensity = property(_get_stimi, _set_stimi)
     
     def _get_stim_ready(self): return True
     def _set_stim_ready(self): pass #Always True
-    stim_ready = property(_get_stim_ready, _set_stim_ready)
+    ready = property(_get_stim_ready, _set_stim_ready)
     
     def trigger(self):
         self.trigbox.trigger()
