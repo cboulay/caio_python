@@ -14,6 +14,22 @@ class Caio(object):
 		RET = self._aio.AioInit(self.devname,byref(self._Id))
 		self._handle_ret('AioInit', RET)
 		
+		#Reset device
+		self.reset_device()
+		
+		#Defaults
+		#range: PM10, not configurable on my device
+		#n_channels: 1
+		#memory_type: FIFO
+		#clock_type: 'Internal' or 0
+		#fs: 1000
+		#start_trigger: 'Software'
+		#stop_trigger: 'Times'
+		self._max_channels = self.max_chans
+		
+		#Reset memory
+		self.reset_memory()
+		
 	def __del__(self):
 		self.stop()
 		RET = self._aio.AioExit(self._Id)
@@ -126,8 +142,8 @@ class Caio(object):
 	def _get_ao_buffer(self):
 		pass
 	def _set_ao_buffer(self, data):
+		data=data[:,0:self._max_channels]#trim excess channels
 		n_samples, n_channels=data.shape
-		data=data[:,0:self.max_chans]#trim excess channels
 		data=np.reshape(data,(n_samples*n_channels,))
 		temp_data = (c_float*(data.shape[0]))()
 		for i in range(data.shape[0]): temp_data[i]=data[i]
@@ -137,12 +153,21 @@ class Caio(object):
 		
 	def _get_sampling_times(self):
 		ao_sampling_time=c_long()
-		RET = self._aio.AioGetSamplingTimes(self._Id, byref(ao_sampling_time))
-		self._handle_ret('AioGetSamplingTimes', RET)
+		RET = self._aio.AioGetAoSamplingTimes(self._Id, byref(ao_sampling_time))
+		self._handle_ret('AioGetAoSamplingTimes', RET)
 		return ao_sampling_time.value
 	def _set_sampling_times(self, value):
 		pass #read-only
 	sampling_times = property(_get_sampling_times, _set_sampling_times)
+	
+	def _get_sampling_count(self):
+		ao_sampling_count=c_long()
+		RET = self._aio.AioGetAoSamplingCount(self._Id, byref(ao_sampling_count))
+		self._handle_ret('AioGetAoSamplingCount', RET)
+		return ao_sampling_count.value
+	def _set_sampling_count(self, value):
+		pass #read-only
+	sampling_count = property(_get_sampling_count, _set_sampling_count)
 	
 	#StartCondition
 	def _get_start_trigger(self):
