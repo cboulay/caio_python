@@ -128,12 +128,12 @@ class Caio(object):
 		clock = c_float()
 		RET = self._aio.AioGetAoSamplingClock(self._Id, byref(clock))
 		self._handle_ret('AioGetAoSamplingClock', RET)
-		return 1000000*(1/clock.value)
+		return 1000000.0*(1.0/clock.value)
 	def _set_sampling_clock(self, value):
 		#Passed-in value in Hz. Function wants sample duration in usec.
 		#e.g. 0.2kHz = 200 samples / sec = 5000 usec per sample
 		#Usable AoSamplingClock is 10 to 107374182
-		clock = c_float(1000000/value)
+		clock = c_float(1000000.0/value)
 		RET = self._aio.AioSetAoSamplingClock(self._Id, clock)
 		self._handle_ret('AioSetAoSamplingClock', RET)
 	fs = property(_get_sampling_clock, _set_sampling_clock)
