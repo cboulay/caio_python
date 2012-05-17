@@ -9,11 +9,11 @@ class NMES(object):
 # Uses Contec DAIO to send a continuous pulse train #
 #####################################################
     
-    def __init__(self, devname=None, width=1.0, frequency=100.0, channel=2, amplitude=0.0):
+    def __init__(self, devname=None, width=1.0, frequency=100.0, channel=2, intensity=0.0):
         """
         Loads up a Caio device with the sole purpose of sending
         a continuous pulse train.
-        Pulse train amplitude, width, frequency, and channel are modifiable.
+        Pulse train intensity, width, frequency, and channel are modifiable.
         
         Methods:
             
@@ -24,7 +24,7 @@ class NMES(object):
         self._width = float(width)
         self._frequency = float(frequency)
         self._channel = int(channel)
-        self._amplitude = float(amplitude)
+        self._intensity = float(intensity)
         self._caio = None
         self._template = None
         #self.V2mA = lambda x: float(5*x) #10V:50mA
@@ -42,7 +42,7 @@ class NMES(object):
         self._caio=caio
         
     def __del__(self):
-        self.amplitude = 0
+        self.intensity = 0
         self._caio.stop()
         
     def _new_template(self):
@@ -76,13 +76,13 @@ class NMES(object):
         self._new_template()
     channel = property(_get_channel, _set_channel)
     
-    def _get_amplitude(self): return self._amplitude * self.V2mA
-    def _set_amplitude(self, value): self._amplitude = float(min(value,15.0)) / self.V2mA #Hard cap of 15 mA
-    amplitude = property(_get_amplitude, _set_amplitude)
+    def _get_intensity(self): return self._intensity * self.V2mA
+    def _set_intensity(self, value): self._intensity = float(min(value,15.0)) / self.V2mA #Hard cap of 15 mA
+    intensity = property(_get_intensity, _set_intensity)
     
     def _get_data(self):
-        #print self._template.shape, self.amplitude, (self._template * self.amplitude).shape
-        return self._template * self._amplitude
+        #print self._template.shape, self.intensity, (self._template * self.intensity).shape
+        return self._template * self._intensity
     def _set_data(self): pass #read-only
     data = property(_get_data, _set_data)
 
@@ -108,7 +108,7 @@ class NMESThread(threading.Thread):
                 self.nmes._caio.buffer = self.nmes.data
                 self.nmes._caio.start()
             if self.nmes._caio.sampling_times <= 1.5 * ((self.nmes.block_dur/1000.0) * my_fs):
-                #Add another template*amplitude to the buffer
+                #Add another template*intensity to the buffer
                 self.nmes._caio.buffer = self.nmes.data
             #Probably need to wait for some msec here so the thread does not kill the processor.
         self.nmes._caio.stop()
@@ -117,17 +117,17 @@ class NMESFIFO(NMES):
 #####################################################
 # Uses Contec DAIO to send a continuous pulse train #
 #####################################################
-    def __init__(self, devname=None, block_dur=100.0, width=1.0, frequency=100.0, channel=2, amplitude=0.0):
+    def __init__(self, devname=None, block_dur=100.0, width=1.0, frequency=100.0, channel=2, intensity=0.0):
         """
         Loads up a Caio device with the sole purpose of sending
         a continuous pulse train.
-        Pulse train amplitude, width, frequency, and channel are modifiable.
+        Pulse train intensity, width, frequency, and channel are modifiable.
         
         Methods:
             
         Properties:
         """
-        NMES.__init__(self, devname=devname, width=width, frequency=frequency, channel=channel, amplitude=amplitude)#Call the super init
+        NMES.__init__(self, devname=devname, width=width, frequency=frequency, channel=channel, intensity=intensity)#Call the super init
         
         #Initialize hidden properties used by getters and setters
         self._block_dur = float(block_dur)
@@ -174,17 +174,17 @@ class NMESRING(NMES):
 #####################################################
 # Uses Contec DAIO to send a continuous pulse train #
 #####################################################
-    def __init__(self, devname=None, width=1.0, frequency=100.0, channel=2, amplitude=0.0):
+    def __init__(self, devname=None, width=1.0, frequency=100.0, channel=2, intensity=0.0):
         """
         Loads up a Caio device with the sole purpose of sending
         a continuous pulse train.
-        Pulse train amplitude, width, frequency, and channel are modifiable.
+        Pulse train intensity, width, frequency, and channel are modifiable.
         
         Methods:
             
         Properties:
         """
-        NMES.__init__(self, devname=devname, width=width, frequency=frequency, channel=channel, amplitude=amplitude)#Call the super init
+        NMES.__init__(self, devname=devname, width=width, frequency=frequency, channel=channel, intensity=intensity)#Call the super init
         self._caio.memory_type='RING'
         self._caio.repeat_times = 0
         #Generate the template using the default width, freq, and channel
@@ -204,10 +204,10 @@ class NMESRING(NMES):
             self._caio.stop()
     running = property(_get_running, _set_running)
     
-    def _get_amplitude(self): return self._amplitude * self.V2mA
-    def _set_amplitude(self, value):
+    def _get_intensity(self): return self._intensity * self.V2mA
+    def _set_intensity(self, value):
         self.running = False
-        self._amplitude = float(min(value,10.0)) / self.V2mA #Hard cap of 10 mA
+        self._intensity = float(min(value,10.0)) / self.V2mA #Hard cap of 10 mA
         self.running = True
         
-    amplitude = property(_get_amplitude, _set_amplitude)
+    intensity = property(_get_intensity, _set_intensity)
