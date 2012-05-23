@@ -50,7 +50,7 @@ class TTL(object):
 		#time.sleep(0.1)
 		#self.trigger() #Necessary to make sure the output is at 0
 		#time.sleep(0.1)
-		#Create default output data, i.e. 5V 50ms TTL on channel 1
+		#Create default output data, i.e. 5V 10ms TTL on channel 1
 		self.amplitude=5
 		
 		
