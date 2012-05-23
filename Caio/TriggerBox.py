@@ -29,7 +29,7 @@ class TTL(object):
 		
 		#Hidden properties used by getters and setters
 		self._amplitude=5
-		self._width=50
+		self._width=10
 		self._channel=1
 		self._caio = None
 		self._data = None
