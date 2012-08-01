@@ -6,7 +6,7 @@ class TTL(object):
 # Uses Contec DAIO to send a TTL #
 ##################################
 	
-	def __init__(self, devname=None):
+	def __init__(self, devname=None, amplitude=5, width=2.5, channel=1):
 		"""
 		Loads up a Caio device with the sole purpose of sending TTLs.
 		TTLs are sent with instance.trigger()
@@ -28,9 +28,9 @@ class TTL(object):
 		"""
 		
 		#Hidden properties used by getters and setters
-		self._amplitude=5
-		self._width=10
-		self._channel=1
+		self._amplitude=amplitude
+		self._width=width
+		self._channel=channel
 		self._caio = None
 		self._data = None
 		
@@ -39,7 +39,7 @@ class TTL(object):
 		caio.n_channels=2
 		caio.memory_type='RING'#FIFO is default
 		caio.clock_type='Internal'
-		caio.fs=1000 #Hz
+		caio.fs=10000 #Hz
 		caio.start_trigger='Software'
 		caio.stop_trigger='Times' #Converting has completed for the specified times
 		caio.repeat_times=1 #0=Infinite
@@ -51,8 +51,7 @@ class TTL(object):
 		#self.trigger() #Necessary to make sure the output is at 0
 		#time.sleep(0.1)
 		#Create default output data, i.e. 5V 10ms TTL on channel 1
-		self.amplitude=5
-		
+		self.amplitude=amplitude
 		
 	def _get_amplitude(self): return self._amplitude
 	def _set_amplitude(self, value): self.set_TTL(amplitude=value)
@@ -64,9 +63,22 @@ class TTL(object):
 		if width: self._width = width
 		if channel: self._channel = channel
 		n_samples = np.ceil((float(self._width)/1000) * self._caio.fs)
-		data=np.zeros((n_samples+1, self._caio.n_channels))
+		data = np.zeros((n_samples+1, self._caio.n_channels))
 		data[:-1,self._channel-1]=self._amplitude
+		if self._channel==1: data[:-1,1]=5
 		self.data=data
+		
+	#===========================================================================
+	# def add_SC(self, width=2):
+	#	width = np.min([self._width,width])
+	#	n_samples = np.ceil((width/1000.0) * self._caio.fs)
+	#	temp=self.data
+	#	temp[1:n_samples-1,1]=5
+	#	#offset the real TTL by 200 usec
+	#	n_offset = np.ceil(0.0002 * self._caio.fs)
+	#	temp[0:n_offset,0]=0
+	#	self.data=temp
+	#===========================================================================
 		
 	def _get_data(self):
 		return self._data
