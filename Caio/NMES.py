@@ -9,7 +9,7 @@ class NMES(object):
 # Uses Contec DAIO to send a continuous pulse train #
 #####################################################
     
-    def __init__(self, devname=None, width=1.0, frequency=100.0, channel=2, intensity=0.0):
+    def __init__(self, devname=None, width=1.0, frequency=100.0, channel=1, intensity=0.0):
         """
         Loads up a Caio device with the sole purpose of sending
         a continuous pulse train.
@@ -117,7 +117,7 @@ class NMESFIFO(NMES):
 #####################################################
 # Uses Contec DAIO to send a continuous pulse train #
 #####################################################
-    def __init__(self, devname=None, block_dur=100.0, width=1.0, frequency=100.0, channel=2, intensity=0.0):
+    def __init__(self, devname=None, block_dur=100.0, width=1.0, frequency=100.0, channel=1, intensity=0.0):
         """
         Loads up a Caio device with the sole purpose of sending
         a continuous pulse train.
@@ -174,7 +174,7 @@ class NMESRING(NMES):
 #####################################################
 # Uses Contec DAIO to send a continuous pulse train #
 #####################################################
-    def __init__(self, devname=None, width=1.0, frequency=100.0, channel=2, intensity=0.0):
+    def __init__(self, devname=None, width=1.0, frequency=100.0, channel=1, intensity=0.0):
         """
         Loads up a Caio device with the sole purpose of sending
         a continuous pulse train.
@@ -191,7 +191,6 @@ class NMESRING(NMES):
         self._new_template()
         
     def __del__(self):
-        self.thread.running = False
         NMES.__del__(self)
         
     def _get_running(self): return self._caio.status
@@ -208,6 +207,6 @@ class NMESRING(NMES):
     def _set_intensity(self, value):
         self.running = False
         self._intensity = float(min(value,10.0)) / self.V2mA #Hard cap of 10 mA
-        self.running = True
+        self.running = True #Resets the buffer
         
     intensity = property(_get_intensity, _set_intensity)
