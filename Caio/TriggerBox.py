@@ -6,18 +6,17 @@ class TTL(object):
 # Uses Contec DAIO to send a TTL #
 ##################################
 	
-	def __init__(self, devname=None, amplitude=5, width=2.5, channel=1):
+	def __init__(self, devname=None, channel=1, amplitude=5, width=5, offset=0):
 		"""
 		Loads up a Caio device with the sole purpose of sending TTLs.
 		TTLs are sent with instance.trigger()
-		TTL amplitude, width, channel are modifiable.
+		Optionally can be instantiated with some attributes for 1 channel.
 		
 		Methods:
 			instance.trigger()
-			instance.set_TTL(amplitude=5, width=50, channel=1)
-				Generates a numpy.array based on the input variables
-				and passes them off to the contec device.
-				Magstim uses defaults and never requires them to change
+			instance.set_TTL(channel=1, amplitude=None, width=None, offset=None)
+				Modifies the buffer for the given channel.
+				Magstim uses defaults and never requires them to change.
 		
 		Properties:
 			instance.data - R/W the data we think are in the Caio buffer
@@ -27,14 +26,13 @@ class TTL(object):
 		The TTL can be further refined by modifying instance._caio 
 		"""
 		
-		#Hidden properties used by getters and setters
-		self._amplitude=amplitude
-		self._width=width
-		self._channel=channel
-		self._caio = None
+		#Hidden properties
 		self._data = None
+		self._attributes = [{},{}]
+		self._attributes[0] = {'amplitude':0.0, 'width':0.0, 'offset':0.0}
+		self._attributes[1] = {'amplitude':0.0, 'width':0.0, 'offset':0.0}
 		
-		#Initialize the trigger box then set some defaults
+		#Initialize the device with the appropriate settings
 		caio = Caio_ctype.Caio(devname=devname)
 		caio.n_channels=2
 		caio.memory_type='RING'#FIFO is default
@@ -46,39 +44,29 @@ class TTL(object):
 		caio.reset_memory()
 		self._caio=caio
 		
-		#self.amplitude=0
-		#time.sleep(0.1)
-		#self.trigger() #Necessary to make sure the output is at 0
-		#time.sleep(0.1)
-		#Create default output data, i.e. 5V 10ms TTL on channel 1
-		self.amplitude=amplitude
+		#Initialize the buffer to 0 and trigger
+		self.data = np.zeros((1, self._caio.n_channels))
+		self.trigger()
 		
-	def _get_amplitude(self): return self._amplitude
-	def _set_amplitude(self, value): self.set_TTL(amplitude=value)
-	amplitude = property(_get_amplitude, _set_amplitude)
+		#Design the data using stored settings.
+		self.set_TTL(channel=channel, amplitude=amplitude, width=width, offset=offset)
 	
-	def set_TTL(self, amplitude=None, width=None, channel=None):
-		#amplitude in V, width in ms, channel in base 1 (first = 1)
-		if amplitude: self._amplitude = amplitude
-		if width: self._width = width
-		if channel: self._channel = channel
-		n_samples = np.ceil((float(self._width)/1000) * self._caio.fs)
-		data = np.zeros((n_samples+1, self._caio.n_channels))
-		data[:-1,self._channel-1]=self._amplitude
-		if self._channel==1: data[:-1,1]=5
-		self.data=data
+	def set_TTL(self, channel=1, amplitude=None, width=None, offset=None):
+		if amplitude: self._attributes[channel-1]['amplitude'] = amplitude
+		if width: self._attributes[channel-1]['width'] = width
+		if offset: self._attributes[channel-1]['offset'] = offset
 		
-	#===========================================================================
-	# def add_SC(self, width=2):
-	#	width = np.min([self._width,width])
-	#	n_samples = np.ceil((width/1000.0) * self._caio.fs)
-	#	temp=self.data
-	#	temp[1:n_samples-1,1]=5
-	#	#offset the real TTL by 200 usec
-	#	n_offset = np.ceil(0.0002 * self._caio.fs)
-	#	temp[0:n_offset,0]=0
-	#	self.data=temp
-	#===========================================================================
+		#Determine how many samples we need and create a 0 buffer.
+		max_time = np.max([a['width']+a['offset'] for a in self._attributes])
+		n_samples = np.ceil((float(max_time)/1000) * self._caio.fs)
+		data = np.zeros((n_samples+1, self._caio.n_channels))
+		
+		#Adjust the buffer for each channel.
+		for cc in range(self._caio.n_channels):
+			offset_samples = np.ceil((float(self._attributes[cc]['offset'])/1000) * self._caio.fs)
+			pulse_samples = np.ceil((float(self._attributes[cc]['width'])/1000) * self._caio.fs)
+			data[offset_samples:offset_samples+pulse_samples,cc-1] = self._attributes[cc]['amplitude']
+		self.data = data
 		
 	def _get_data(self):
 		return self._data
