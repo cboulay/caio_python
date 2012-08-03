@@ -65,7 +65,7 @@ class TTL(object):
 		for cc in range(self._caio.n_channels):
 			offset_samples = np.ceil((float(self._attributes[cc]['offset'])/1000) * self._caio.fs)
 			pulse_samples = np.ceil((float(self._attributes[cc]['width'])/1000) * self._caio.fs)
-			data[offset_samples:offset_samples+pulse_samples,cc-1] = self._attributes[cc]['amplitude']
+			data[offset_samples:offset_samples+pulse_samples,cc] = self._attributes[cc]['amplitude']
 		self.data = data
 		
 	def _get_data(self):
