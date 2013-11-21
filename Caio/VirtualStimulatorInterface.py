@@ -1,5 +1,5 @@
 class Virtual(object):
-    def __init__(self, trigbox=None, mychan=None):
+    def __init__(self, trigbox = None, mychan = 2, V2mA = 5.0):
         """
         This is a simple interface to a virtual stimulator.
         It is meant to mimic the MagstimInterface thus the same properties
@@ -18,21 +18,21 @@ class Virtual(object):
             stim_instance.stim_ready = True
                 Always true since there is no way to know if it is not ready.
         """
-        self.V2mA = 5.0 #10V:50mA
         if not trigbox:
             from Caio import TriggerBox
             trigbox = TriggerBox.TTL()
         self.trigbox = trigbox
-        self.my_chan = 1 if not mychan else mychan-1#Base 0.
+        self.my_chan = mychan-1 #Base 0.
+        self.V2mA = float(V2mA) #5.0 = 10V:50mA
+        self.intensity = 0
         
     def _get_stimi(self):
         return self.trigbox._attributes[self.my_chan]['amplitude'] * self.V2mA
-    def _set_stimi(self, mamps):
-        mamps = float(mamps)
-        #mamps = max([mamps,0.5])
-        #Since I am detecting triggers on the trigger channel
-        #There must be a minimum stimulus, which I set to 0.5mA or about 50mV on the output.
-        self.trigbox._attributes[self.my_chan]['amplitude'] = mamps / self.V2mA
+    def _set_stimi(self, mamps): #Passed in intensity is mA
+        vamps = float(mamps) / self.V2mA #Convert to DIO V
+        vamps = min(vamps, 10.0) #Can't output more than 10.0 V
+        #vamps = max([vamps, 0.05]) #Digitimer has a minimum V before it triggers, around 50mV
+        self.trigbox._attributes[self.my_chan]['amplitude'] = vamps
     intensity = property(_get_stimi, _set_stimi)
     
     def _get_stim_ready(self): return True
