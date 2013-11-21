@@ -1,5 +1,5 @@
 class Virtual(object):
-    def __init__(self, trigbox = None, mychan = 2, V2mA = 5.0):
+    def __init__(self, trigbox = None, mychan = 2, V2mA = 1.0):
         """
         This is a simple interface to a virtual stimulator.
         It is meant to mimic the MagstimInterface thus the same properties
@@ -33,6 +33,7 @@ class Virtual(object):
         vamps = min(vamps, 10.0) #Can't output more than 10.0 V
         #vamps = max([vamps, 0.05]) #Digitimer has a minimum V before it triggers, around 50mV
         self.trigbox._attributes[self.my_chan]['amplitude'] = vamps
+        self.trigbox.set_TTL()
     intensity = property(_get_stimi, _set_stimi)
     
     def _get_stim_ready(self): return True
