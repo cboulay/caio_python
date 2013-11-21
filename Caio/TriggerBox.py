@@ -33,7 +33,7 @@ class TTL(object):
 		self._attributes[1] = {'amplitude':0.0, 'width':0.0, 'offset':0.0}
 		
 		#Initialize the device with the appropriate settings
-		caio = Caio_ctype.Caio(devname=devname)
+		caio = Caio_ctype.Caio(DeviceName=devname)
 		caio.n_channels=2
 		caio.memory_type='RING'#FIFO is default
 		caio.clock_type='Internal'
