@@ -9,6 +9,14 @@ Only works in windows but shouldn't be too difficult to modify to load the linux
 The Contec [driver](http://www.contec.com/products/download.cgi?HTML=DTL&KATA=AIO-160802AY-USB&KATASIKI=AIO&BUNRUI=0,0,0&SYUBETU=0#2)
  must be installed.
 
+Download this repository
+`git clone https://github.com/cboulay/caio_python.git caio_python`
+
+Install it as a Python package.
+`python setup.py install`
+
+Run python (`ipython`), then enter the following commands.
+
 ```python
 from Caio.TriggerBox import TTL
 trigbox=TTL()
@@ -17,7 +25,7 @@ trigbox.set_TTL(width=1, channel=2)
 trigbox.trigger()
 ```
 
-My [magstim module](https://github.com/cboulay/magstim-python) may be triggered via this triggerbox.
+My [magstim module](https://github.com/cboulay/magstim_python) may be triggered via this triggerbox.
 I also use a Digitimer DS5 but it is considerably simpler than the Magstim device so I have
 created a VirtualStimulatorInterface (included in this package) that can be used in place of the Magstim interface.
 This VirtualStimulatorInterface, like the Magstim interface, has a method trigger() which is
@@ -31,4 +39,4 @@ stimulator.trigger()
 
 ## Other information
 
-Used by my [magstim module](https://github.com/cboulay/magstim-python).
+Used by my [magstim module](https://github.com/cboulay/magstim_python).
